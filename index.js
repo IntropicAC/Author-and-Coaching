@@ -161,12 +161,12 @@ let inView = true;
 const treesLayer = $(".trees");
 
 // Config you can tweak:
-const TREE_BASE = 160;              // desired base width per tree (px)
-const TREE_BASE_MOBILE = 120;       // tighter on mobile for more trees
+const TREE_BASE = 100;              // desired base width per tree (px)
+const TREE_BASE_MOBILE = 100;       // tighter on mobile for more trees
 const TREE_COLOR = "#3E5F44";      // matches --pine
-const TREE_VARIANCE = 0.2;        // height randomness (0..1)
+const TREE_VARIANCE = 0.8;        // height randomness (0..1)
 const ROWS = 1;                    // number of rows (1 = like your design)
-const OVERLAP = 0.1;              // how much trees overlap (0..0.8)
+const OVERLAP = -0.2;              // how much trees overlap (0..0.8)
 
 // Build an SVG string of N triangles across the width
 function buildTreesSVG(width, height) {
@@ -377,4 +377,14 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
+
+// Set --header-h to the actual header height (handles responsive + font loads)
+function setHeaderHeightVar() {
+  const header = document.querySelector('.site-header');
+  const h = header ? header.offsetHeight : 0;
+  document.documentElement.style.setProperty('--header-h', `${h}px`);
+}
+window.addEventListener('load', setHeaderHeightVar);
+window.addEventListener('resize', setHeaderHeightVar);
+document.fonts?.ready?.then(setHeaderHeightVar);
 

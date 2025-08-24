@@ -1,12 +1,15 @@
 /* ===== Core variables (your palette) ===== */
 :root {
+  --header-h: 72px; 
+
+
   --pine: #3E5F44;   /* dark */
   --fern: #5E936C;   /* primary */
   --mint: #93DA97;   /* accents */
   --cream: #E8FFD7;  /* background */
   --ink:  #1d2a1d;   /* text */
   --sky:  #0b1020;   /* star sky */
-
+  
   --white: #ffffff;
   --radius: 16px;
 
@@ -42,6 +45,7 @@ body {
   color: var(--ink);
   background: var(--cream);
   line-height: 1.6;
+ padding-top: 0 !important;
 }
 
 img,
@@ -67,12 +71,9 @@ canvas {
 
 /* ===== Header / Nav ===== */
 .site-header {
-  position: static;     /* was: sticky */
-  /* top: 0;            remove this when not sticky */
-  z-index: auto;        /* optional reset */
-  background: linear-gradient(180deg, rgba(232,255,215,1), rgba(232,255,215,1)); /* optional: remove transparency if you like */
-  border-bottom: 1px solid rgba(62,95,68,.15);
-  /* backdrop-filter: saturate(110%);  optional: not needed anymore */
+  position: static !important;
+  top: auto; left: auto; right: auto;
+  z-index: auto;
 }
 
 .nav {
@@ -145,6 +146,8 @@ canvas {
 
 /* Mobile nav */
 @media (max-width: 860px) {
+  .site-nav { z-index: 1100; }
+
   .menu-btn {
     display: inline-block;
   }
@@ -173,11 +176,36 @@ canvas {
 }
 
 /* ===== Hero ===== */
+/* HERO — exactly one viewport minus header */
 .hero {
   position: relative;
   color: var(--cream);
   isolation: isolate;
+  min-block-size: calc(100svh - var(--header-h));
+  padding-block: 0;  /* keep hero free of global section padding */
+
+  /* overlay sizes relative to hero */
+  --trees-h: clamp(160px, 34%, 360px);
+  --shore-h: clamp(100px, 22%, 260px);
 }
+
+.hero-inner {
+  display: grid;
+  align-content: center;
+  justify-items: left;                 /* center on desktop */
+  row-gap: .75rem;
+  padding-bottom: max(1rem, calc(var(--trees-h) * 0.35));
+}
+
+
+
+
+.hero,
+.hero-inner {
+ min-height: calc(100svh - var(--header-h)) !important;
+}
+
+
 
 .hero-canvas {
   position: absolute;
@@ -185,6 +213,7 @@ canvas {
   z-index: -3;
   background: radial-gradient(1200px 600px at 70% -10%, #223 0%, #101522 35%, var(--sky) 85%);
 }
+
 
 /* Hero section mobile padding */
 @media (max-width: 768px) {
@@ -227,45 +256,56 @@ canvas {
     flex: 0 0 auto;           /* stop them stretching weirdly */
     text-align: center;
   }
-}
 
+  /* Ensure heading row spans full width and centers */
+  .hero-heading {
+    width: 100%;
+    text-align: center;
+    margin-left: 0;
+    margin-right: 0;
+  }
 
-.trees {
-  position: absolute;
-  inset-inline: 0;
-  bottom: 0;
-  height: min(38svh, 360px);
-  z-index: -2;
-  /* remove background-image; we'll inject an SVG instead */
-  pointer-events: none;
-}
+  /* The quote container */
+  .quote-viewport {
+    position: relative;      /* keep the absolute child anchored */
+    width: 100%;
+    display: flex;           /* reserve height cleanly */
+    align-items: center;
+    justify-content: center;
+    min-height: 3.2rem;      /* enough height for the largest line */
+    padding: 0 1rem;         /* side padding so long lines don’t hug edges */
+  }
 
-/* ensure the injected SVG fills the layer */
-.trees svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.shore {
-  position: absolute;
-  inset-inline: 0;
-  bottom: 0;
-  height: min(26svh, 260px);
-  z-index: -1;
-  background: linear-gradient(180deg, rgba(10,42,42,0), rgba(10,42,42,.55) 40%, rgba(10,42,42,.85));
-  filter: blur(.2px);
-}
-
+  /* The animated quote itself (absolutely positioned) */
+  #quote,
+  .hero-quote {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    text-align: center !important;
+  }
 .hero-inner {
-  min-height: clamp(360px, 60svh, 700px);
   display: grid;
   align-content: center;
-  justify-items: start;     /* <-- stops full-width stretch */
-  row-gap: .75rem;          /* nice spacing between rows */
+  justify-items: center;                 /* center on desktop */
+  row-gap: .75rem;
+  padding-bottom: max(1rem, calc(var(--trees-h) * 0.35));
 }
+
+  /* Optional: also center the hidden sizing text for consistency */
+  
+  
+}
+
+
+
+.trees       { position: absolute; inset-inline: 0; bottom: 0; height: var(--trees-h); z-index: -2; pointer-events:none; }
+.trees svg   { position: absolute; inset: 0; width: 100%; height: 100%; display:block; }
+.shore       { position: absolute; inset-inline: 0; bottom: 0; height: var(--shore-h); z-index: -1;
+               background: linear-gradient(180deg, rgba(10,42,42,0), rgba(10,42,42,.55) 40%, rgba(10,42,42,.85)); filter: blur(.2px); }
+
+
+
 .hero h1 {
   font-size: var(--fs-xl);
   line-height: 1.1;
@@ -311,15 +351,6 @@ canvas {
 }
 
 
-
-/* optional but recommended: keep the hero stable overall */
-.hero-inner {
-  min-height: clamp(360px, 60svh, 700px);
-  display: grid;
-  align-content: center;
-}
-
-
 .tag {
   display: inline-block;
   background: var(--mint);
@@ -328,6 +359,7 @@ canvas {
   border-radius: 999px;
   font-size: .85rem;
   font-weight: 800;
+  margin-top: 40px;
 }
 
 .cta {
@@ -361,7 +393,7 @@ canvas {
 
 .btn.secondary {
   background: transparent;
-  color: var(--pine);
+  color: rgb(149, 231, 149);
   border-color: var(--mint);
 }
 
@@ -371,34 +403,62 @@ canvas {
   color: var(--pine);
 }
 
-/* Header socials */
 
-.nav-socials {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1.2rem;
+.hero-socials {
+  display: inline-flex;
+  gap: 0.9rem;
+  margin-top: 1rem;          /* adjust if you want it tighter/looser to CTA */
+  z-index: 5;
   position: relative;
-  z-index: 10; /* ensures they sit above hero layers */
 }
 
-.nav-socials a {
-  font-size: 1.6rem;
-  color: white;              /* visible against dark hero background */
-  transition: color .2s ease;
+.hero-socials a {
+  --icon-size: 24px;
+  --tap: 44px;               /* accessible hit area */
+  display: inline-grid;
+  place-items: center;
+  width: var(--tap);
+  height: var(--tap);
+  color: white;              /* controls icon via currentColor */
+  text-decoration: none;
+  border-radius: 999px;
+  outline: none;
 }
 
-.nav-socials a:hover {
-  color: var(--mint);
+.hero-socials svg {
+  width: var(--icon-size);
+  height: var(--icon-size);
+  fill: currentColor;
+  transition: transform .15s ease, color .2s ease;
 }
 
-.nav-socials svg {
-  width: 1.4rem;
-  height: 1.4rem;
-  fill: white;
-  transition: fill .2s ease;
+.hero-socials a:hover svg,
+.hero-socials a:focus-visible svg { transform: translateY(-1px) scale(1.03); }
+
+/* focus ring for keyboard users */
+.hero-socials a:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--mint) 70%, white 30%);
 }
-.nav-socials a:hover svg {
-  fill: var(--mint);
+
+/* brand-ish hover colors (optional) */
+.hero-socials a[href*="linkedin"]  { --brand: #0A66C2; }
+.hero-socials a[href*="instagram"] { --brand: #E1306C; }
+.hero-socials a[href*="goodreads"] { --brand: #553b08; }
+.hero-socials a:hover, .hero-socials a:focus-visible { color: var(--brand, var(--mint)); }
+
+@media (max-width: 768px) {
+  .hero-socials { justify-content: center; }
+}
+
+/* Optional variant: pin top-right of hero */
+.hero .hero-socials.is-corner {
+  position: absolute;
+  top: clamp(12px, 2vh, 24px);
+  right: clamp(12px, 3vw, 24px);
+  margin-top: 0;
+  padding-right: env(safe-area-inset-right, 0px);
+  padding-top: env(safe-area-inset-top, 0px);
+  z-index: 10;
 }
 
 
@@ -467,8 +527,9 @@ canvas {
 
 
 section {
-  scroll-margin-top: 84px;
   padding: var(--space-5) 0;
+  scroll-margin-top: calc(var(--header-h) + 12px); 
+
 }
 
 .section-title {
