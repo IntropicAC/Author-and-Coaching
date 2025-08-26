@@ -403,62 +403,37 @@ canvas {
   color: var(--pine);
 }
 
-
-.hero-socials {
-  display: inline-flex;
-  gap: 0.9rem;
-  margin-top: 1rem;          /* adjust if you want it tighter/looser to CTA */
-  z-index: 5;
-  position: relative;
+.hero-icons {
+  display: flex;
+  justify-content: center;
+  gap: 1.2rem;
+  margin-top: 1.2rem;
 }
 
-.hero-socials a {
-  --icon-size: 24px;
-  --tap: 44px;               /* accessible hit area */
+.hero-icons a {
   display: inline-grid;
   place-items: center;
-  width: var(--tap);
-  height: var(--tap);
-  color: white;              /* controls icon via currentColor */
-  text-decoration: none;
-  border-radius: 999px;
-  outline: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1); /* subtle circle bg */
+  transition: background 0.3s ease, transform 0.2s ease;
 }
 
-.hero-socials svg {
-  width: var(--icon-size);
-  height: var(--icon-size);
-  fill: currentColor;
-  transition: transform .15s ease, color .2s ease;
+.hero-icons svg {
+  width: 22px;
+  height: 22px;
+  fill: white; /* matches your hero text */
+  transition: fill 0.3s ease;
 }
 
-.hero-socials a:hover svg,
-.hero-socials a:focus-visible svg { transform: translateY(-1px) scale(1.03); }
-
-/* focus ring for keyboard users */
-.hero-socials a:focus-visible {
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--mint) 70%, white 30%);
+.hero-icons a:hover {
+  background: var(--mint);
+  transform: translateY(-2px);
 }
 
-/* brand-ish hover colors (optional) */
-.hero-socials a[href*="linkedin"]  { --brand: #0A66C2; }
-.hero-socials a[href*="instagram"] { --brand: #E1306C; }
-.hero-socials a[href*="goodreads"] { --brand: #553b08; }
-.hero-socials a:hover, .hero-socials a:focus-visible { color: var(--brand, var(--mint)); }
-
-@media (max-width: 768px) {
-  .hero-socials { justify-content: center; }
-}
-
-/* Optional variant: pin top-right of hero */
-.hero .hero-socials.is-corner {
-  position: absolute;
-  top: clamp(12px, 2vh, 24px);
-  right: clamp(12px, 3vw, 24px);
-  margin-top: 0;
-  padding-right: env(safe-area-inset-right, 0px);
-  padding-top: env(safe-area-inset-top, 0px);
-  z-index: 10;
+.hero-icons a:hover svg {
+  fill: var(--pine); /* contrast on hover */
 }
 
 
@@ -791,82 +766,6 @@ textarea:focus {
   transform: none;
 }
 
-/* ===== Socials ===== */
-.socials {
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--mint) 18%, var(--cream) 82%),
-    var(--cream)
-  );
-}
-
-.socials-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-3);
-  margin-top: var(--space-3);
-}
-
-@media (max-width: 960px) {
-  .socials-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-@media (max-width: 600px) {
-  .socials-grid { grid-template-columns: 1fr; }
-}
-
-.social-card {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-3);
-  background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.9));
-  border: 1px solid rgba(62,95,68,.12);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  text-decoration: none;
-  color: var(--pine);
-  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
-}
-
-.social-card:hover,
-.social-card:focus {
-  transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--mint) 60%, #000 0%);
-  box-shadow: 0 10px 26px rgba(0,0,0,.12);
-}
-
-.social-icon {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--mint) 40%, #fff 60%);
-  border: 1px solid rgba(62,95,68,.2);
-  flex: 0 0 44px;
-}
-
-.social-icon svg {
-  width: 24px;
-  height: 24px;
-  fill: var(--pine);
-}
-
-.social-text strong {
-  display: block;
-  font-weight: 900;
-  color: var(--pine);
-  line-height: 1.2;
-}
-
-.social-text small {
-  display: block;
-  color: color-mix(in srgb, var(--pine) 70%, black 30%);
-  margin-top: 2px;
-  font-size: .92em;
-}
-
-
 /* Footer */
 .site-footer {
   padding: var(--space-4) 0;
@@ -879,6 +778,38 @@ textarea:focus {
   align-items: center;
   gap: var(--space-2);
 }
+
+.footer-socials {
+  display: flex;
+  justify-content: center;   /* centers horizontally */
+  align-items: center;
+  gap: 1.5rem;                 /* extra breathing space between items */
+  margin-top: 2rem;          /* more space above */
+}
+
+.footer-link {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+  text-decoration: none;
+  color: var(--pine);
+  font-weight: 600;
+  font-size: clamp(0.95rem, 2.5vw, 1.2rem); /* min, fluid, max */
+  transition: color 0.2s ease;
+}
+
+.footer-link svg {
+  width: 1.2em;                          /* scales with text */
+  height: 1.2em;                         /* keeps square */
+  fill: currentColor;
+}
+
+.footer-link:hover,
+.footer-link:focus {
+  color: var(--fern);
+}
+
+
 
 /* Reduced motion respect */
 @media (prefers-reduced-motion: reduce) {
