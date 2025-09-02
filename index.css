@@ -1,33 +1,139 @@
 /* ===== Core variables (your palette) ===== */
 :root {
-  --header-h: 72px; 
-
-
-  --pine: #3E5F44;   /* dark */
-  --fern: #5E936C;   /* primary */
-  --mint: #93DA97;   /* accents */
-  --cream: #E8FFD7;  /* background */
-  --ink:  #1d2a1d;   /* text */
-  --sky:  #0b1020;   /* star sky */
-  
+  --header-h: 80px;
+  --shadow: 0 8px 24px rgba(0,0,0,.10);
+  --maxw: 1500px;
+  --pine: #3E5F44;   
+  --fern: #5E936C;   
+  --mint: #93DA97;   
+  --cream: #E8FFD7;  
+  --ink:  #1d2a1d;   
+  --sky:  #0b1020;   
   --white: #ffffff;
   --radius: 16px;
 
-  /* Fluid type & spacing */
-  --fs-sm: clamp(.9rem, .5vw + .8rem, 1rem);
-  --fs-md: clamp(1rem, .6vw + .9rem, 1.125rem);
-  --fs-lg: clamp(1.25rem, 1.2vw + 1rem, 1.6rem);
-  --fs-xl: clamp(2rem, 3.5vw + 1rem, 3.2rem);
+  /* Default font sizes (mobile-first, 320px-479px) */
+  --fs-xs: 0.75rem;    /* 12px */
+  --fs-sm: 0.875rem;   /* 14px */
+  --fs-md: 1rem;       /* 16px */
+  --fs-lg: 1.25rem;    /* 20px */
+  --fs-xl: 1.75rem;    /* 28px */
+  --fs-2xl: 2rem;      /* 32px */
+  --fs-3xl: 2.5rem;    /* 40px */
 
-  --space-1: clamp(.5rem, .8vw, .8rem);
-  --space-2: clamp(.75rem, 1vw, 1rem);
-  --space-3: clamp(1rem, 1.6vw, 1.5rem);
-  --space-4: clamp(1.5rem, 2.5vw, 2rem);
-  --space-5: clamp(2rem, 4vw, 3rem);
+  /* Default spacing (mobile-first) */
+  --space-1: 0.5rem;   /* 8px */
+  --space-2: 0.75rem;  /* 12px */
+  --space-3: 1rem;     /* 16px */
+  --space-4: 1.5rem;   /* 24px */
+  --space-5: 2rem;     /* 32px */
+  --space-6: 3rem;     /* 48px */
 
   --shadow: 0 8px 24px rgba(0,0,0,.10);
-  --maxw: 1400px;
+  --maxw: 1500px;
 }
+
+/* Small tablets (480px and up) */
+@media (min-width: 480px) {
+  :root {
+    --fs-xs: 0.8125rem;  /* 13px */
+    --fs-sm: 0.9375rem;  /* 15px */
+    --fs-md: 1.0625rem;  /* 17px */
+    --fs-lg: 1.375rem;   /* 22px */
+    --fs-xl: 2rem;       /* 32px */
+    --fs-2xl: 2.25rem;   /* 36px */
+    --fs-3xl: 2.75rem;   /* 44px */
+
+    --space-1: 0.625rem;  /* 10px */
+    --space-2: 1rem;      /* 16px */
+    --space-3: 1.25rem;   /* 20px */
+    --space-4: 1.75rem;   /* 28px */
+    --space-5: 2.5rem;    /* 40px */
+    --space-6: 3.5rem;    /* 56px */
+  }
+}
+
+/* Tablets (768px and up) */
+@media (min-width: 768px) {
+  :root {
+    --fs-xs: 0.875rem;   /* 14px */
+    --fs-sm: 1rem;       /* 16px */
+    --fs-md: 1.125rem;   /* 18px */
+    --fs-lg: 1.5rem;     /* 24px */
+    --fs-xl: 2.25rem;    /* 36px */
+    --fs-2xl: 2.75rem;   /* 44px */
+    --fs-3xl: 3.25rem;   /* 52px */
+
+    --space-1: 0.75rem;   /* 12px */
+    --space-2: 1.125rem;  /* 18px */
+    --space-3: 1.5rem;    /* 24px */
+    --space-4: 2.25rem;   /* 36px */
+    --space-5: 3rem;      /* 48px */
+    --space-6: 4rem;      /* 64px */
+  }
+}
+
+/* Small desktops (1024px and up) */
+@media (min-width: 1024px) {
+  :root {
+    --fs-xs: 0.9375rem;  /* 15px */
+    --fs-sm: 1.0625rem;  /* 17px */
+    --fs-md: 1.25rem;    /* 20px */
+    --fs-lg: 1.75rem;    /* 28px */
+    --fs-xl: 2.5rem;     /* 40px */
+    --fs-2xl: 3rem;      /* 48px */
+    --fs-3xl: 3.5rem;    /* 56px */
+
+    --space-1: 0.875rem;  /* 14px */
+    --space-2: 1.25rem;   /* 20px */
+    --space-3: 1.75rem;   /* 28px */
+    --space-4: 2.5rem;    /* 40px */
+    --space-5: 3.5rem;    /* 56px */
+    --space-6: 4.5rem;    /* 72px */
+  }
+}
+
+/* Large desktops (1440px and up) */
+@media (min-width: 1440px) {
+  :root {
+    --fs-xs: 1rem;       /* 16px */
+    --fs-sm: 1.125rem;   /* 18px */
+    --fs-md: 1.375rem;   /* 22px */
+    --fs-lg: 2rem;       /* 32px */
+    --fs-xl: 3rem;       /* 48px */
+    --fs-2xl: 3.5rem;    /* 56px */
+    --fs-3xl: 4rem;      /* 64px */
+
+    --space-1: 1rem;      /* 16px */
+    --space-2: 1.5rem;    /* 24px */
+    --space-3: 2rem;      /* 32px */
+    --space-4: 3rem;      /* 48px */
+    --space-5: 4rem;      /* 64px */
+    --space-6: 5rem;      /* 80px */
+  }
+}
+
+/* Extra large screens (1920px and up) */
+@media (min-width: 1920px) {
+  :root {
+    --fs-xs: 1.0625rem;  /* 17px */
+    --fs-sm: 1.25rem;    /* 20px */
+    --fs-md: 1.5rem;     /* 24px */
+    --fs-lg: 2.125rem;   /* 34px */
+    --fs-xl: 3.25rem;    /* 52px */
+    --fs-2xl: 3.75rem;   /* 60px */
+    --fs-3xl: 4.5rem;    /* 72px */
+
+    --space-1: 1.125rem;  /* 18px */
+    --space-2: 1.625rem;  /* 26px */
+    --space-3: 2.25rem;   /* 36px */
+    --space-4: 3.25rem;   /* 52px */
+    --space-5: 4.5rem;    /* 72px */
+    --space-6: 5.5rem;    /* 88px */
+  }
+
+}
+
 
 /* ===== Base ===== */
 * {
@@ -183,26 +289,24 @@ canvas {
   isolation: isolate;
   min-block-size: calc(100svh - var(--header-h));
   padding-block: 0;  /* keep hero free of global section padding */
-
+  display: flex;                        /* Use flexbox for centering */
+  align-items: center;                  /* Vertical center */
+  justify-content: center;  
   /* overlay sizes relative to hero */
   --trees-h: clamp(160px, 34%, 360px);
   --shore-h: clamp(100px, 22%, 260px);
+
+  min-height: calc(100vh - var(--header-h));      /* fallback */
+  max-height: calc(100dvh - var(--header-h));
 }
 
 .hero-inner {
   display: grid;
   align-content: center;
-  justify-items: left;                 /* center on desktop */
-  row-gap: .75rem;
+  justify-items: center;                /* center on desktop */
+  row-gap: var(--space-2);
   padding-bottom: max(1rem, calc(var(--trees-h) * 0.35));
-}
-
-
-
-
-.hero,
-.hero-inner {
- min-height: calc(100svh - var(--header-h)) !important;
+  padding-top: var(--space-5)
 }
 
 
@@ -288,7 +392,7 @@ canvas {
   display: grid;
   align-content: center;
   justify-items: center;                 /* center on desktop */
-  row-gap: .75rem;
+  row-gap: var(--space-2);
   padding-bottom: max(1rem, calc(var(--trees-h) * 0.35));
 }
 
@@ -307,7 +411,7 @@ canvas {
 
 
 .hero h1 {
-  font-size: var(--fs-xl);
+  font-size: var(--fs-lg);
   line-height: 1.1;
   margin: 0 0 .6rem;
   font-weight: 900;
@@ -325,14 +429,20 @@ canvas {
 .hero-quote {
   position: absolute;
   inset: 0;
-  display: block;
   text-align: left;
   transition: opacity 500ms ease;
   will-change: opacity;
+  display: flex !important;
+    align-items: center;
+    justify-content: center;
+    text-align: center !important;
 }
 
 .quote-viewport {
-  position: relative;   /* so the quote can be absolutely positioned if desired */
+  position: relative; 
+  display: flex;
+  align-items: center;
+  justify-content: center;  /* so the quote can be absolutely positioned if desired */
 }
 
 .quote-viewport::after {
@@ -357,9 +467,9 @@ canvas {
   color: var(--pine);
   padding: .25rem .6rem;
   border-radius: 999px;
-  font-size: .85rem;
+  font-size: var(--fs-md);
   font-weight: 800;
-  margin-top: 40px;
+  margin-top: 3rem;
 }
 
 .cta {
@@ -611,6 +721,12 @@ section {
 @media (min-width: 1024px) {
   .books-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+  .books-grid > .book-card:last-child:nth-child(odd) {
+    grid-column: 1 / -1;      /* span both columns */
+    justify-self: center;      /* center the card itself */
+    max-width: 720px;          /* keep it from getting too wide (tweak as you like) */
+    width: 100%;
   }
 }
 
