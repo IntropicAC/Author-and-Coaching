@@ -3,40 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="color-scheme" content="light dark">
+  <meta name="color-scheme" content="normal">
   <meta name="supported-color-schemes" content="light dark">
   <title>Authenticity & Belief Coach • Author</title>
   <meta name="description" content="Authenticity & belief coaching and author site themed by nature, woodland, lake, and space." />
   <link rel="stylesheet" href="index.css" />
   
 </head>
-<script>
+<body>
+  <script>
 (() => {
-  // Check saved preference
   const saved = localStorage.getItem('theme');
-  
-  // Check system preference
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  
-  // Apply theme more explicitly
-  if (saved === 'dark' || (saved !== 'light' && prefersDark)) {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    document.documentElement.style.colorScheme = 'dark';
+  if (saved === 'dark' || saved === 'light') {
+    document.documentElement.setAttribute('data-theme', saved);
+    document.documentElement.style.colorScheme = saved;
   } else {
-    document.documentElement.setAttribute('data-theme', 'light');
-    document.documentElement.style.colorScheme = 'light';
-  }
-  
-  // Force a repaint on Samsung devices
-  if (navigator.userAgent.includes('Samsung')) {
-    document.body.style.display = 'none';
-    document.body.offsetHeight; // Trigger reflow
-    document.body.style.display = '';
+    // Check system preference
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (prefersDark) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.documentElement.style.colorScheme = 'dark';
+    }
   }
 })();
 </script>
-<body>
-
   <header class="site-header">
     <div class="container nav">
       <div class="brand">

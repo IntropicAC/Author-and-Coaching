@@ -4,7 +4,7 @@
   --maxw: 1500px;
   --radius: 16px;
   
-  color-scheme: light dark; 
+  color-scheme: normal !important;
   /* Light mode colors (default) */
   --pine: #3E5F44;   
   --fern: #5E936C;   
@@ -118,44 +118,6 @@
   --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.5);
 }
 
-/* Automatic dark mode based on system preference */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    /* Same as [data-theme="dark"] values - moonlit forest tones */
-    --pine: #3E5F44;   
-  --fern: #5E936C;   
-  --mint: #93DA97;   
-  --cream: #E8FFD7;  
-  --ink:  #1d2a1d;   
-  --sky:  #0b1020;   
-  --white: #ffffff;
-  
-    
-    --color-bg-primary: #161A18;
-    --color-bg-secondary: #1D2220;
-    --color-bg-tertiary: #242928;
-    
-    --color-text-primary: #D8DDD9;
-    --color-text-secondary: #A8B5AF;
-    --color-text-muted: rgba(168, 181, 175, 0.65);
-    --color-text-inverse: #1A1F1D;
-    
-    --color-accent-primary: #7A9187;
-    --color-accent-secondary: #8FA79C;
-    --color-accent-hover: #8FA896;
-    
-    --color-border: rgba(168, 181, 175, 0.1);
-    --color-border-strong: rgba(168, 181, 175, 0.2);
-    
-    --color-hero-bg: radial-gradient(1200px 600px at 70% -10%, #1B2329 0%, #161C20 35%, #13171A 85%);
-    --color-hero-text: #DDE0DE;
-    --color-hero-overlay: rgba(22, 26, 24, 0.9);
-    
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
-    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
-    --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.6);
-  }
-}
 
 /* Tablets (768px and up) */
 @media (min-width: 768px) {
