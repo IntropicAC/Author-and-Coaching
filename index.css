@@ -270,6 +270,7 @@
 
 html {
   scroll-behavior: smooth;
+  color-scheme: normal !important;
 }
 
 body {

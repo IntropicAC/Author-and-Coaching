@@ -11,20 +11,22 @@
   
 </head>
 <body>
-  <script>
+ <script>
 (() => {
+  // Remove any inline color-scheme to prevent Samsung interference
+  document.documentElement.style.removeProperty('color-scheme');
+  
   const saved = localStorage.getItem('theme');
-  if (saved === 'dark' || saved === 'light') {
-    document.documentElement.setAttribute('data-theme', saved);
-    document.documentElement.style.colorScheme = saved;
-  } else {
-    // Check system preference
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (prefersDark) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      document.documentElement.style.colorScheme = 'dark';
-    }
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  
+  if (saved === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  } else if (saved === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+  } else if (prefersDark) {
+    document.documentElement.setAttribute('data-theme', 'dark');
   }
+  // Don't set colorScheme at all - let CSS handle it
 })();
 </script>
   <header class="site-header">
