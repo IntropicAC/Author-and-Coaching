@@ -336,7 +336,7 @@ const rawQuotes = [
   "Don't fight against the problems of the world until it attacks us personally.",
   "The character you are pretending to be is not you.",
   "The more you learn, the more you realize how little you know.",
-  "Books make the world bigger."
+  "We don't fight against the problems of the world until they attack us personally"
 ];
 
 document.addEventListener("DOMContentLoaded", () => {
