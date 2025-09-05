@@ -1,3 +1,15 @@
+// Set --header-h to the actual header height (handles responsive + font loads)
+function setHeaderHeightVar() {
+  const header = document.querySelector('.site-header');
+  const h = header ? header.offsetHeight : 0;
+  document.documentElement.style.setProperty('--header-h', `${h}px`);
+}
+window.addEventListener('load', setHeaderHeightVar);
+window.addEventListener('resize', setHeaderHeightVar);
+document.fonts?.ready?.then(setHeaderHeightVar);
+
+
+
 // =====================
 // Helpers
 // =====================
@@ -377,14 +389,4 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-
-// Set --header-h to the actual header height (handles responsive + font loads)
-function setHeaderHeightVar() {
-  const header = document.querySelector('.site-header');
-  const h = header ? header.offsetHeight : 0;
-  document.documentElement.style.setProperty('--header-h', `${h}px`);
-}
-window.addEventListener('load', setHeaderHeightVar);
-window.addEventListener('resize', setHeaderHeightVar);
-document.fonts?.ready?.then(setHeaderHeightVar);
 

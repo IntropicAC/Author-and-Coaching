@@ -3,11 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark">
   <title>Authenticity & Belief Coach • Author</title>
   <meta name="description" content="Authenticity & belief coaching and author site themed by nature, woodland, lake, and space." />
   <link rel="stylesheet" href="index.css" />
-
+  
 </head>
+<script>
+(() => {
+  const saved = localStorage.getItem('theme');
+  if (saved === 'dark' || saved === 'light') {
+    document.documentElement.setAttribute('data-theme', saved);
+  } // else leave unset so OS preference can apply
+})();
+</script>
 <body>
 
   <header class="site-header">

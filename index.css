@@ -4,6 +4,7 @@
   --maxw: 1500px;
   --radius: 16px;
   
+  color-scheme: light dark; 
   /* Light mode colors (default) */
   --pine: #3E5F44;   
   --fern: #5E936C;   
@@ -21,7 +22,7 @@
   --color-text-primary: #1d2a1d;      /* ink - main text */
   --color-text-secondary: #3E5F44;    /* pine - headings, important text */
   --color-text-muted: rgba(62, 95, 68, 0.85);  /* muted pine */
-  --color-text-inverse: #E8FFD7;      /* cream - text on dark backgrounds */
+  --color-text-inverse: #ffffff;      /* cream - text on dark backgrounds */
   
   --color-accent-primary: #5E936C;    /* fern - primary buttons, links */
   --color-accent-secondary: #6f9e70;  /* mint - secondary buttons, highlights */
