@@ -118,6 +118,16 @@
   --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.5);
 }
 
+/* Remove [data-theme] selectors and use media queries directly */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg-primary: #0a0d0a !important;
+    --color-bg-secondary: #141814 !important;
+    --color-text-primary: #E8F4E8 !important;
+    /* all your dark variables with !important */
+  }
+}
+
 
 /* Tablets (768px and up) */
 @media (min-width: 768px) {
