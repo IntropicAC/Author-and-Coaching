@@ -168,20 +168,20 @@
 }
 
 /* Landscape mobile/tablet exception */
-@media (max-width: 786px) and (max-height: 525px) {
+@media (max-width: 786px) and (max-height: 600px) {
   :root {
     --fs-sm: 1.2rem;
-    --fs-md: 0.7rem;
-    --fs-lg: 1rem;
-    --fs-xl: 1.2rem;
+    --fs-md: 1rem;
+    --fs-lg: 1.3rem;
+    --fs-xl: 1.4rem;
     --fs-2xl: 2.2rem;
     --fs-3xl: 2.8rem;
 
     --space-2: 0rem;
     --space-4: 0rem;
     
-    --social-svg-md: 0.8rem;
-    --social-svg-lg: 1.7rem;
+    --social-svg-md: 1.3rem;
+    --social-svg-lg: 2.2rem;
     --hero-gap: 1rem;
   }
 
