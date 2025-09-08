@@ -362,7 +362,7 @@ img, svg, canvas {
   color: var(--color-hero-text);
   isolation: isolate;
   min-height: calc(100vh - var(--header-h));
-  max-height: calc(100dvh - var(--header-h));
+  min-height: calc(100dvh - var(--header-h));
   display: flex;
   align-items: center;
   justify-content: center;
