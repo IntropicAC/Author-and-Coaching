@@ -396,11 +396,11 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!form || !notice) return;
 
   // 👉 Your Web3Forms access key
-  const WEB3FORMS_ACCESS_KEY = 'YOUR_ACCESS_KEY_HERE';
+  const WEB3FORMS_ACCESS_KEY = 'ea43cbd1-40ff-48e6-a2f0-f7db5530624a';
 
   // Optional labels for the email you receive
   const EMAIL_SUBJECT  = 'New Website Message';
-  const EMAIL_FROMNAME = 'My Portfolio Website';
+  const EMAIL_FROMNAME = 'My coaching Website';
 
   // Simple time-trap to reduce bot spam
   const pageLoadTs = Date.now();
@@ -477,7 +477,7 @@ document.addEventListener("DOMContentLoaded", () => {
         notice.textContent = 'Sent ✅';
         form.reset();
       } else if (data.message && /quota|limit/i.test(data.message)) {
-        notice.textContent = 'Temporarily unavailable (quota exceeded). Please email me directly.';
+        notice.textContent = 'Temporarily unavailable. Please message me threw any links below.';
       } else {
         notice.textContent = 'Something went wrong. Please try again.';
       }
