@@ -389,4 +389,100 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
+// === Web3Forms integration (no HTML changes required) ===
+(() => {
+  const form   = document.getElementById('contact-form');
+  const notice = document.getElementById('form-notice');
+  if (!form || !notice) return;
 
+  // 👉 Your Web3Forms access key
+  const WEB3FORMS_ACCESS_KEY = 'YOUR_ACCESS_KEY_HERE';
+
+  // Optional labels for the email you receive
+  const EMAIL_SUBJECT  = 'New Website Message';
+  const EMAIL_FROMNAME = 'My Portfolio Website';
+
+  // Simple time-trap to reduce bot spam
+  const pageLoadTs = Date.now();
+
+  function isValidEmail(v) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+  }
+
+  // Clear custom validity as the user types
+  ['name','email','message'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () => el.setCustomValidity(''));
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const name    = document.getElementById('name');
+    const email   = document.getElementById('email');
+    const message = document.getElementById('message');
+
+    // Reset any previous custom errors
+    [name, email, message].forEach(el => el && el.setCustomValidity(''));
+
+    // ------ Our original validations, but without tiny #form-notice text ------
+    let hasError = false;
+
+    if (!name.value.trim()) {
+      name.setCustomValidity('Please enter your name.');
+      if (!hasError) { name.reportValidity(); name.focus(); }
+      hasError = true;
+    }
+
+    if (!email.value.trim()) {
+      email.setCustomValidity('Please enter your email.');
+      if (!hasError) { email.reportValidity(); email.focus(); }
+      hasError = true;
+    } else if (!isValidEmail(email.value)) {
+      email.setCustomValidity('Please enter a valid email address.');
+      if (!hasError) { email.reportValidity(); email.focus(); }
+      hasError = true;
+    }
+
+    if (!message.value.trim()) {
+      message.setCustomValidity('Please enter a message.');
+      if (!hasError) { message.reportValidity(); message.focus(); }
+      hasError = true;
+    }
+
+    if (hasError) return; // stop here on validation errors
+
+    // Time-trap: block super-fast submits (likely bots)
+    if (Date.now() - pageLoadTs < 1200) {
+      // silently ignore (no tiny text in notice)
+      return;
+    }
+
+    // ------ Send only when valid ------
+    notice.textContent = 'Sending...';
+
+    try {
+      const fd = new FormData();
+      fd.append('access_key', WEB3FORMS_ACCESS_KEY);
+      fd.append('subject', EMAIL_SUBJECT);
+      fd.append('from_name', EMAIL_FROMNAME);
+      fd.append('name',    name.value.trim());
+      fd.append('email',   email.value.trim());
+      fd.append('message', message.value.trim());
+
+      const res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: fd });
+      const data = await res.json();
+
+      if (data.success) {
+        notice.textContent = 'Sent ✅';
+        form.reset();
+      } else if (data.message && /quota|limit/i.test(data.message)) {
+        notice.textContent = 'Temporarily unavailable (quota exceeded). Please email me directly.';
+      } else {
+        notice.textContent = 'Something went wrong. Please try again.';
+      }
+    } catch {
+      notice.textContent = 'Network error. Please try again.';
+    }
+  });
+})();
