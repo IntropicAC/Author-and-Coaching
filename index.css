@@ -168,7 +168,7 @@
 }
 
 /* Landscape mobile/tablet exception */
-@media (max-width: 786px) and (max-height: 633px) {
+@media (max-width: 786px) and (max-height: 525px) {
   :root {
     --fs-sm: 1.2rem;
     --fs-md: 0.7rem;
