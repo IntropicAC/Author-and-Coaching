@@ -227,33 +227,36 @@
 </section>
 
     <section class="contact lazy-section">
-      <div class="container" id="contact">
-        <h2 class="section-title" >Contact</h2>
-        <p class="muted">Tell me a little about what you’re hoping to change. I’ll reply within 2 business days.</p>
+  <div class="container" id="contact">
+    <h2 class="section-title">Contact</h2>
+    <p class="muted">Tell me a little about what you’re hoping to change. I’ll reply within 2 business days.</p>
 
-        <form id="contact-form" class="card" novalidate>
-          <div class="grid form-grid">
-            <label class="field">
-              <span>Name</span>
-              <input id="name" name="name" required placeholder="Your full name" />
-            </label>
-            <label class="field">
-              <span>Email</span>
-              <input id="email" name="email" type="email" required placeholder="you@example.com" />
-            </label>
-          </div>
+    <form action="https://api.web3forms.com/submit" method="POST" id="contact-form" class="card" novalidate>
+      <!-- Web3Forms Access Key -->
+      <input type="hidden" name="access_key" value="ea43cbd1-40ff-48e6-a2f0-f7db5530624a" />
 
-          <label class="field">
-            <span>Message</span>
-            <textarea id="message" name="message" rows="5" required placeholder="How can I help?"></textarea>
-          </label>
-
-          <div class="form-actions">
-            <button class="btn primary" type="submit">Send</button>
-            <span class="notice" id="form-notice" role="status" aria-live="polite"></span>
-          </div>
-        </form>
+      <div class="grid form-grid">
+        <label class="field">
+          <span>Name</span>
+          <input id="name" name="name" required placeholder="Your full name" />
+        </label>
+        <label class="field">
+          <span>Email</span>
+          <input id="email" name="email" type="email" required placeholder="you@example.com" />
+        </label>
       </div>
+
+      <label class="field">
+        <span>Message</span>
+        <textarea id="message" name="message" rows="5" required placeholder="How can I help?"></textarea>
+      </label>
+
+      <div class="form-actions">
+        <button class="btn primary" type="submit">Send</button>
+        <span class="notice" id="form-notice" role="status" aria-live="polite"></span>
+      </div>
+    </form>
+  </div>
 
       <div class="footer-socials">
         
