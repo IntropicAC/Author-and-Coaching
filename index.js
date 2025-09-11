@@ -471,17 +471,20 @@ document.addEventListener("DOMContentLoaded", () => {
       fd.append('message', message.value.trim());
 
       const res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: fd });
-      const data = await res.json();
+const data = await res.json();
 
-      if (data.success) {
-        notice.textContent = 'Sent ✅';
-        form.reset();
-      } else if (data.message && /quota|limit/i.test(data.message)) {
-        notice.textContent = 'Temporarily unavailable. Please message me threw any links below.';
-      } else {
-        notice.textContent = 'Something went wrong. Please try again.';
-      }
-    } catch {
+// Add this for debugging
+console.log('Web3Forms response:', data);
+
+if (data.success) {
+  notice.textContent = 'Sent ✅';
+  form.reset();
+} else {
+  // More detailed error for debugging
+  console.error('Web3Forms error:', data);
+  notice.textContent = data.message || 'Something went wrong. Please try again.';
+}
+}catch {
       notice.textContent = 'Network error. Please try again.';
     }
   });

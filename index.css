@@ -885,8 +885,19 @@ textarea:focus {
   margin-top: var(--space-1);
 }
 
+
+#form-notice {
+  font-size: 1.1rem;  /* or whatever size you prefer */
+  font-weight: 500;   /* optional: make it slightly bolder */
+  color: #10b981;     /* optional: green color for success */
+}
+
+/* Or if you want it to match your button size */
 .notice {
-  font-size: 0.5rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  display: inline-block;
+  margin-left: 1rem;
   color: var(--color-text-muted);
 }
 
