@@ -19,6 +19,35 @@
     "How can Sam help me?"
   ];
 
+  /* ---- Scroll lock (prevents page scrolling behind fullscreen chat on mobile) ---- */
+  var scrollLockY = 0;
+  function lockPageScroll() {
+    try {
+      if (!window.matchMedia || !window.matchMedia("(max-width: 768px)").matches) return;
+
+      scrollLockY = window.scrollY || window.pageYOffset || 0;
+      document.documentElement.classList.add("sam-chat-scroll-lock");
+      document.body.style.position = "fixed";
+      document.body.style.top = "-" + scrollLockY + "px";
+      document.body.style.left = "0";
+      document.body.style.right = "0";
+      document.body.style.width = "100%";
+    } catch (e) {}
+  }
+
+  function unlockPageScroll() {
+    try {
+      document.documentElement.classList.remove("sam-chat-scroll-lock");
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
+      document.body.style.width = "";
+      if (scrollLockY) window.scrollTo(0, scrollLockY);
+      scrollLockY = 0;
+    } catch (e) {}
+  }
+
   /* ---- Viewport helpers (prevents mobile UI bars clipping fixed widget) ---- */
   function updateViewportCssVars() {
     try {
@@ -117,6 +146,11 @@
     }
     sendBtnEl.disabled = !inputEl.value.trim() || isLoading;
   });
+  inputEl.addEventListener("focus", function () {
+    updateViewportCssVars();
+    setTimeout(scrollToBottom, 50);
+    setTimeout(scrollToBottom, 250);
+  });
   inputEl.addEventListener("keydown", function (e) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -173,6 +207,7 @@
     toggle.innerHTML = isOpen ? closeIcon() : chatIcon();
 
     if (isOpen) {
+      lockPageScroll();
       if (!welcomeShown) {
         addMessageToDOM("assistant", WELCOME_MESSAGE);
         showPromptSuggestions();
@@ -182,6 +217,8 @@
         initThread();
       }
       setTimeout(function () { inputEl.focus(); }, 150);
+    } else {
+      unlockPageScroll();
     }
   }
 
