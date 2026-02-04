@@ -327,6 +327,60 @@
   transform: scale(1.03);
 }
 
+/* Book cover cards */
+.sam-chat-book-cards {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-border);
+  flex-wrap: wrap;
+}
+.sam-chat-book-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none !important;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  max-width: 70px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.sam-chat-book-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+.sam-chat-book-card img {
+  width: 60px;
+  height: auto;
+  display: block;
+}
+.sam-chat-book-card span {
+  font-size: 0.6rem;
+  padding: 3px 4px;
+  text-align: center;
+  color: var(--color-text-secondary);
+  line-height: 1.15;
+  width: 100%;
+}
+
+/* Amazon link */
+.sam-chat-amazon-link {
+  color: var(--color-accent-primary) !important;
+  font-weight: 600;
+  text-decoration: none !important;
+}
+.sam-chat-amazon-link:hover {
+  text-decoration: underline !important;
+}
+
+/* Inline formatting */
+.sam-chat-msg strong {
+  font-weight: 600;
+}
+
 /* Animations */
 @keyframes samChatFadeIn {
   from { opacity: 0; transform: translateY(8px); }
@@ -335,6 +389,16 @@
 @keyframes samChatBounce {
   0%, 80%, 100% { transform: scale(0); }
   40% { transform: scale(1); }
+}
+
+/* Desktop — smaller chat font */
+@media (min-width: 769px) {
+  .sam-chat-msg {
+    font-size: 0.8rem;
+  }
+  .sam-chat-input {
+    font-size: 0.8rem;
+  }
 }
 
 /* Mobile full-screen */

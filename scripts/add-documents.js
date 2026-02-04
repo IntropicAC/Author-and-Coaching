@@ -11,6 +11,7 @@ import OpenAI from "openai";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { SAM_AI_INSTRUCTIONS } from "./sam-instructions.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -53,7 +54,7 @@ async function main() {
 
   // 1. Create vector store
   console.log("\n1. Creating vector store...");
-  const vectorStore = await openai.beta.vectorStores.create({
+  const vectorStore = await openai.vectorStores.create({
     name: "Sam Murgatroyd - Books & Coaching Materials",
   });
   console.log(`   Vector Store ID: ${vectorStore.id}`);
@@ -74,16 +75,17 @@ async function main() {
 
   // 3. Add files to vector store
   console.log("\n3. Adding files to vector store...");
-  const batch = await openai.beta.vectorStores.fileBatches.createAndPoll(
+  const batch = await openai.vectorStores.fileBatches.createAndPoll(
     vectorStore.id,
     { file_ids: fileIds }
   );
   console.log(`   Status: ${batch.status}`);
   console.log(`   Files processed: ${batch.file_counts.completed}/${batch.file_counts.total}`);
 
-  // 4. Update the assistant to use file_search with the new vector store
-  console.log("\n4. Updating assistant with document access...");
+  // 4. Update the assistant to use file_search with the new vector store + refresh instructions
+  console.log("\n4. Updating assistant with document access and instructions...");
   await openai.beta.assistants.update(process.env.OPENAI_ASSISTANT_ID, {
+    instructions: SAM_AI_INSTRUCTIONS,
     tools: [{ type: "file_search" }],
     tool_resources: {
       file_search: {
@@ -93,7 +95,8 @@ async function main() {
   });
 
   console.log("\n" + "=".repeat(55));
-  console.log("  Documents added! Your assistant now has file access.");
+  console.log("  Documents added and instructions updated!");
+  console.log("  Your assistant now has file access.");
   console.log("=".repeat(55) + "\n");
 }
 

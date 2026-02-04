@@ -18,6 +18,29 @@
     "Tell me about Sam's coaching",
     "How can Sam help me?"
   ];
+  const BOOK_DATA = [
+    {
+      id: "the-policy",
+      title: "The Policy",
+      pattern: /\bThe Policy\b/i,
+      cover: "/images/the-policy-front-cover.jpg",
+      url: "https://www.amazon.co.uk/Policy-Sam-Murgatroyd-ebook/dp/B0FLZZ96WL/"
+    },
+    {
+      id: "alienated",
+      title: "Alienated",
+      pattern: /\bAlienated\b/,
+      cover: "/images/alienated-front-cover.jpg",
+      url: "https://www.amazon.co.uk/Alienated-Sam-Murgatroyd/dp/B0CVF4BCDR/"
+    },
+    {
+      id: "robins-bench",
+      title: "Robin's Bench",
+      pattern: /\bRobin'?s Bench\b/i,
+      cover: "/images/robins-bench-front-cover.jpg",
+      url: "https://www.amazon.co.uk/Robins-Bench-Sam-Murgatroyd/dp/B0FFGY7JP5/"
+    }
+  ];
 
   /* ---- Scroll lock (prevents page scrolling behind fullscreen chat on mobile) ---- */
   var scrollLockY = 0;
@@ -332,14 +355,16 @@
         function readChunk() {
           return reader.read().then(function (result) {
             if (result.done) {
-              // Save and linkify
               if (fullText) {
-                state.messages.push({ role: "assistant", content: fullText });
+                // Strip citations before saving
+                var cleanText = fullText.replace(/【[^】]*】/g, "").replace(/ {2,}/g, " ").trim();
+                state.messages.push({ role: "assistant", content: cleanText });
                 saveState();
-                msgEl.innerHTML = linkify(fullText);
+                msgEl.innerHTML = formatMessage(fullText) + detectBookCards(fullText);
               }
               isLoading = false;
               sendBtnEl.disabled = !inputEl.value.trim();
+              scrollToBottom();
               return;
             }
 
@@ -354,7 +379,8 @@
                 var parsed = JSON.parse(data);
                 if (parsed.text) {
                   fullText += parsed.text;
-                  msgEl.textContent = fullText;
+                  // Strip complete + trailing incomplete citations during streaming
+                  msgEl.textContent = fullText.replace(/【[^】]*】/g, "").replace(/【[^】]*$/, "");
                   scrollToBottom();
                 }
                 if (parsed.error) {
@@ -382,7 +408,7 @@
     var el = document.createElement("div");
     el.className = "sam-chat-msg " + role;
     if (role === "assistant") {
-      el.innerHTML = linkify(content);
+      el.innerHTML = formatMessage(content) + detectBookCards(content);
     } else {
       el.textContent = content;
     }
@@ -447,12 +473,43 @@
     return div.innerHTML;
   }
 
-  function linkify(text) {
+  function formatMessage(text) {
     if (!text) return "";
+    // Strip file_search citations like 【4:13†Alienated Book.docx】
+    text = text.replace(/【[^】]*】/g, "").replace(/ {2,}/g, " ").trim();
     var escaped = escapeHtml(text);
-    return escaped.replace(
-      /(https?:\/\/[^\s<]+)/g,
-      '<a href="$1" target="_blank" rel="noopener">$1</a>'
-    );
+    // Bold: **text**
+    escaped = escaped.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    // Italic: *text*
+    escaped = escaped.replace(/\*([^*\n]+)\*/g, "<em>$1</em>");
+    // URLs — Amazon gets a clean label, others show raw
+    escaped = escaped.replace(/(https?:\/\/[^\s<]+)/g, function (url) {
+      if (url.indexOf("amazon.co.uk") !== -1) {
+        return '<a href="' + url + '" target="_blank" rel="noopener" class="sam-chat-amazon-link">View on Amazon \u2192</a>';
+      }
+      return '<a href="' + url + '" target="_blank" rel="noopener">' + url + "</a>";
+    });
+    // Line breaks
+    escaped = escaped.replace(/\n/g, "<br>");
+    return escaped;
+  }
+
+  function detectBookCards(text) {
+    if (!text) return "";
+    var html = "";
+    var found = [];
+    BOOK_DATA.forEach(function (book) {
+      if (book.pattern.test(text)) found.push(book);
+    });
+    if (found.length === 0) return "";
+    html = '<div class="sam-chat-book-cards">';
+    found.forEach(function (book) {
+      html +=
+        '<a class="sam-chat-book-card" href="' + book.url + '" target="_blank" rel="noopener">' +
+        '<img src="' + book.cover + '" alt="' + book.title + '" />' +
+        "<span>" + book.title + "</span></a>";
+    });
+    html += "</div>";
+    return html;
   }
 })();

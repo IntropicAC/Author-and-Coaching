@@ -2,6 +2,7 @@
 node_modules/
 .vercel/
 documents/
+*.zip
 
 .vercel
 .env*.local

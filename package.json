@@ -1,6 +1,7 @@
 {
   "name": "sam-ai-chatbot",
   "version": "1.0.0",
+  "type": "module",
   "private": true,
   "dependencies": {
     "openai": "^4.78.0"
