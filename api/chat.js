@@ -272,6 +272,7 @@ export default async function handler(req, res) {
           conversation: threadId,
           input: message,
           stream: true,
+          max_output_tokens: 350, // ~250 words max response
           ...(vectorStoreId
             ? { tools: [{ type: "file_search", vector_store_ids: [vectorStoreId] }] }
             : {}),
