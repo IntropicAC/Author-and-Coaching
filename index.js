@@ -128,31 +128,7 @@ $("#toTop")?.addEventListener("click", (e) => {
 
 
 // =====================
-// Contact form (client-side only)
-// =====================
-const form = $("#contact-form");
-const notice = $("#form-notice");
-
-form?.addEventListener("submit", (e) => {
-  e.preventDefault();
-  const data = Object.fromEntries(new FormData(form).entries());
-
-  if (!data.name || !data.email || !data.message) {
-    notice.textContent = "Please fill in all fields.";
-    return;
-  }
-  if (!emailRegex.test(data.email)) {
-    notice.textContent = "Please enter a valid email address.";
-    return;
-  }
-
-  // Demo: open mail client (replace with your recipient to receive messages)
-  window.location.href = `mailto:${data.email}?subject=Coaching%20Enquiry%20from%20${encodeURIComponent(
-    data.name
-  )}&body=${encodeURIComponent(data.message)}`;
-
-  setTimeout(() => (notice.textContent = "Opening your email client…"), 0);
-});
+// Contact form handled via /api/contact (see bottom of file)
 
 
 // =====================
@@ -345,7 +321,6 @@ const rawQuotes = [
   "A lack of confidence killed more dreams than a lack of competence ever did.",
   "The road to heaven often feels like hell — and the road to hell often feels like heaven.",
   "Some of us are strangers to ourselves.",
-  "Don't fight against the problems of the world until it attacks us personally.",
   "The character you are pretending to be is not you.",
   "The more you learn, the more you realize how little you know.",
   "We don't fight against the problems of the world until they attack us personally"
@@ -389,18 +364,11 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-// === Web3Forms integration (no HTML changes required) ===
+// === Contact form integration (server-side via /api/contact) ===
 (() => {
   const form   = document.getElementById('contact-form');
   const notice = document.getElementById('form-notice');
   if (!form || !notice) return;
-
-  // 👉 Your Web3Forms access key
-  const WEB3FORMS_ACCESS_KEY = 'ea43cbd1-40ff-48e6-a2f0-f7db5530624a';
-
-  // Optional labels for the email you receive
-  const EMAIL_SUBJECT  = 'New Website Message';
-  const EMAIL_FROMNAME = 'My coaching Website';
 
   // Simple time-trap to reduce bot spam
   const pageLoadTs = Date.now();
@@ -462,29 +430,25 @@ document.addEventListener("DOMContentLoaded", () => {
     notice.textContent = 'Sending...';
 
     try {
-      const fd = new FormData();
-      fd.append('access_key', WEB3FORMS_ACCESS_KEY);
-      fd.append('subject', EMAIL_SUBJECT);
-      fd.append('from_name', EMAIL_FROMNAME);
-      fd.append('name',    name.value.trim());
-      fd.append('email',   email.value.trim());
-      fd.append('message', message.value.trim());
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name.value.trim(),
+          email: email.value.trim(),
+          message: message.value.trim()
+        })
+      });
 
-      const res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: fd });
-const data = await res.json();
+      const data = await res.json().catch(() => null);
 
-// Add this for debugging
-console.log('Web3Forms response:', data);
-
-if (data.success) {
-  notice.textContent = 'Sent ✅';
-  form.reset();
-} else {
-  // More detailed error for debugging
-  console.error('Web3Forms error:', data);
-  notice.textContent = data.message || 'Something went wrong. Please try again.';
-}
-}catch {
+      if (res.ok && data && data.success) {
+        notice.textContent = 'Sent ✅';
+        form.reset();
+      } else {
+        notice.textContent = (data && (data.error || data.message)) || 'Something went wrong. Please try again.';
+      }
+    } catch {
       notice.textContent = 'Network error. Please try again.';
     }
   });
