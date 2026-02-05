@@ -7,6 +7,106 @@ const ASSISTANT_ID = process.env.OPENAI_ASSISTANT_ID;
 const VECTOR_STORE_ID = process.env.OPENAI_VECTOR_STORE_ID;
 const MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
 
+// ============ SECURITY CONFIGURATION ============
+const ALLOWED_ORIGINS = [
+  "https://www.sam-murgatroyd.co.uk",
+  "https://sam-murgatroyd.co.uk",
+];
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+const MAX_REQUESTS_PER_WINDOW = 15;  // 15 requests per minute
+const MAX_THREADS_PER_DAY = 10;      // 10 new threads per day
+const MAX_MESSAGE_LENGTH = 500;
+
+// ============ RATE LIMITING (In-Memory) ============
+const rateLimitMap = new Map();
+
+function getClientIP(req) {
+  const forwarded = req.headers["x-forwarded-for"];
+  if (forwarded) return forwarded.split(",")[0].trim();
+  return req.headers["x-real-ip"] || "unknown";
+}
+
+function checkRateLimit(ip, isThreadCreation = false) {
+  const now = Date.now();
+  const dayStart = new Date().setHours(0, 0, 0, 0);
+
+  // Cleanup old entries to prevent memory bloat
+  if (rateLimitMap.size > 10000) {
+    for (const [key, val] of rateLimitMap) {
+      if (now - val.timestamp > RATE_LIMIT_WINDOW * 10) rateLimitMap.delete(key);
+    }
+  }
+
+  if (!rateLimitMap.has(ip)) {
+    rateLimitMap.set(ip, {
+      count: 1,
+      timestamp: now,
+      dailyThreads: isThreadCreation ? 1 : 0,
+      dayStart,
+    });
+    return { allowed: true };
+  }
+
+  const data = rateLimitMap.get(ip);
+
+  // Reset daily counter if new day
+  if (data.dayStart !== dayStart) {
+    data.dailyThreads = 0;
+    data.dayStart = dayStart;
+  }
+
+  // Check daily thread limit
+  if (isThreadCreation && data.dailyThreads >= MAX_THREADS_PER_DAY) {
+    return { allowed: false, reason: "daily_limit" };
+  }
+
+  // Reset window if expired
+  if (now - data.timestamp > RATE_LIMIT_WINDOW) {
+    data.count = 1;
+    data.timestamp = now;
+    if (isThreadCreation) data.dailyThreads++;
+    return { allowed: true };
+  }
+
+  // Check rate limit
+  if (data.count >= MAX_REQUESTS_PER_WINDOW) {
+    const retryAfter = Math.ceil((RATE_LIMIT_WINDOW - (now - data.timestamp)) / 1000);
+    return { allowed: false, reason: "rate_limit", retryAfter };
+  }
+
+  // Increment counters
+  data.count++;
+  if (isThreadCreation) data.dailyThreads++;
+  return { allowed: true };
+}
+
+// ============ INPUT VALIDATION ============
+function validateInput(body) {
+  const { message, threadId } = body;
+
+  if (message !== undefined) {
+    if (typeof message !== "string" || message.trim().length === 0) {
+      return { valid: false, error: "Message cannot be empty" };
+    }
+    if (message.length > MAX_MESSAGE_LENGTH) {
+      return { valid: false, error: `Message too long (max ${MAX_MESSAGE_LENGTH} characters)` };
+    }
+  }
+
+  if (threadId && (typeof threadId !== "string" || !/^[a-zA-Z0-9_-]+$/.test(threadId))) {
+    return { valid: false, error: "Invalid conversation ID" };
+  }
+
+  return { valid: true };
+}
+
+// ============ ORIGIN VALIDATION ============
+function validateOrigin(req) {
+  const origin = req.headers.origin;
+  if (!origin) return true; // Allow server-side requests (no origin header)
+  return ALLOWED_ORIGINS.includes(origin);
+}
+
 export default async function handler(req, res) {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
@@ -19,6 +119,42 @@ export default async function handler(req, res) {
     return;
   }
 
+  // ============ SECURITY CHECKS ============
+
+  // 1. Origin validation
+  if (!validateOrigin(req)) {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+
+  // 2. Honeypot check (bots auto-fill hidden fields)
+  const { honeypot } = req.body || {};
+  if (honeypot && honeypot.trim() !== "") {
+    // Silently accept but don't process (don't reveal detection)
+    return res.status(200).json({ threadId: "ok" });
+  }
+
+  // 3. Rate limiting
+  const clientIP = getClientIP(req);
+  const { action } = req.body || {};
+  const rateCheck = checkRateLimit(clientIP, action === "create_thread");
+  if (!rateCheck.allowed) {
+    if (rateCheck.retryAfter) {
+      res.setHeader("Retry-After", rateCheck.retryAfter);
+    }
+    const errorMsg = rateCheck.reason === "daily_limit"
+      ? "You've started too many chats today. Please try again tomorrow."
+      : "Please slow down. Try again in a moment.";
+    return res.status(429).json({ error: errorMsg });
+  }
+
+  // 4. Input validation
+  const inputCheck = validateInput(req.body || {});
+  if (!inputCheck.valid) {
+    return res.status(400).json({ error: inputCheck.error });
+  }
+
+  // ============ END SECURITY CHECKS ============
+
   // Check env vars are set
   if (!process.env.OPENAI_API_KEY) {
     console.error("OPENAI_API_KEY is not set");
@@ -27,7 +163,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { action, threadId, message } = req.body;
+    const { threadId, message } = req.body;
 
     // Create a new thread
     if (action === "create_thread") {

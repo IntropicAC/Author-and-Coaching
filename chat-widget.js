@@ -129,6 +129,7 @@
     <div class="sam-chat-messages"></div>
     <div class="sam-chat-input-area">
       <input class="sam-chat-input" type="text" placeholder="Ask about Sam's books or coaching..." />
+      <input type="text" name="website" class="sam-chat-hp" autocomplete="off" tabindex="-1" aria-hidden="true" />
       <button class="sam-chat-send" aria-label="Send" disabled>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
       </button>
@@ -138,9 +139,15 @@
   /* ---- Get references IMMEDIATELY after creating DOM ---- */
   const messagesEl = container.querySelector(".sam-chat-messages");
   const inputEl = container.querySelector(".sam-chat-input");
+  const honeypotEl = container.querySelector(".sam-chat-hp");
   const sendBtnEl = container.querySelector(".sam-chat-send");
   const closeBtn = container.querySelector(".sam-chat-close");
   const newBtn = container.querySelector(".sam-chat-new");
+
+  /* ---- Hide honeypot (bot trap) ---- */
+  if (honeypotEl) {
+    honeypotEl.style.cssText = "position:absolute;left:-9999px;opacity:0;height:0;width:0;pointer-events:none;";
+  }
 
   /* ---- Append to page ---- */
   document.body.appendChild(toggle);
@@ -250,7 +257,7 @@
     fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "create_thread" }),
+      body: JSON.stringify({ action: "create_thread", honeypot: honeypotEl?.value || "" }),
     })
       .then(function (res) { return res.json(); })
       .then(function (data) {
@@ -289,7 +296,7 @@
       fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "create_thread" }),
+        body: JSON.stringify({ action: "create_thread", honeypot: honeypotEl?.value || "" }),
       })
         .then(function (res) { return res.json(); })
         .then(function (data) {
@@ -333,7 +340,7 @@
     fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ threadId: state.threadId, message: text }),
+      body: JSON.stringify({ threadId: state.threadId, message: text, honeypot: honeypotEl?.value || "" }),
     })
       .then(function (res) {
         typingEl.remove();
