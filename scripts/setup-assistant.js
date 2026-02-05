@@ -112,6 +112,7 @@ async function main() {
   console.log("  Setup complete! Add this to your .env file:");
   console.log("=".repeat(55));
   console.log(`OPENAI_ASSISTANT_ID=${assistant.id}`);
+  if (vectorStoreId) console.log(`OPENAI_VECTOR_STORE_ID=${vectorStoreId}`);
   console.log("=".repeat(55));
   console.log("\nAlso add this as an environment variable in Vercel:");
   console.log("  Vercel Dashboard → Settings → Environment Variables\n");

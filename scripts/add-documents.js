@@ -97,6 +97,8 @@ async function main() {
   console.log("\n" + "=".repeat(55));
   console.log("  Documents added and instructions updated!");
   console.log("  Your assistant now has file access.");
+  console.log(`  Vector Store ID: ${vectorStore.id}`);
+  console.log(`  Add/update this in .env and Vercel: OPENAI_VECTOR_STORE_ID=${vectorStore.id}`);
   console.log("=".repeat(55) + "\n");
 }
 
