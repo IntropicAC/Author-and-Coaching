@@ -20,6 +20,52 @@ const MAX_MESSAGE_LENGTH = 500;
 // ============ RATE LIMITING (In-Memory) ============
 const rateLimitMap = new Map();
 
+// ============ SEQUENTIAL TOKEN SYSTEM ============
+// Prevents parallel request abuse - each request must include token from previous response
+const tokenMap = new Map(); // threadId -> { token, timestamp }
+const TOKEN_EXPIRY = 5 * 60 * 1000; // 5 minutes
+
+function generateToken() {
+  return Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
+
+function validateSequentialToken(threadId, token) {
+  // First request for a thread doesn't need a token
+  if (!tokenMap.has(threadId)) {
+    return { valid: true, isFirst: true };
+  }
+
+  const stored = tokenMap.get(threadId);
+
+  // Check if token expired
+  if (Date.now() - stored.timestamp > TOKEN_EXPIRY) {
+    tokenMap.delete(threadId);
+    return { valid: false, reason: "expired" };
+  }
+
+  // Check if token matches
+  if (stored.token !== token) {
+    return { valid: false, reason: "invalid" };
+  }
+
+  return { valid: true };
+}
+
+function setNextToken(threadId) {
+  const token = generateToken();
+  tokenMap.set(threadId, { token, timestamp: Date.now() });
+
+  // Cleanup old tokens periodically
+  if (tokenMap.size > 5000) {
+    const now = Date.now();
+    for (const [id, data] of tokenMap) {
+      if (now - data.timestamp > TOKEN_EXPIRY) tokenMap.delete(id);
+    }
+  }
+
+  return token;
+}
+
 function getClientIP(req) {
   const forwarded = req.headers["x-forwarded-for"];
   if (forwarded) return forwarded.split(",")[0].trim();
@@ -153,6 +199,19 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: inputCheck.error });
   }
 
+  // 5. Sequential token validation (prevents parallel request abuse)
+  const { threadId, seqToken } = req.body || {};
+  if (action !== "create_thread" && threadId) {
+    const tokenCheck = validateSequentialToken(threadId, seqToken);
+    if (!tokenCheck.valid) {
+      return res.status(429).json({
+        error: tokenCheck.reason === "expired"
+          ? "Session expired. Please refresh the page."
+          : "Please wait for the previous message to complete."
+      });
+    }
+  }
+
   // ============ END SECURITY CHECKS ============
 
   // Check env vars are set
@@ -170,7 +229,9 @@ export default async function handler(req, res) {
       console.log("Creating conversation...");
       const conversation = await openai.post("/conversations", { body: {} });
       console.log("Conversation created:", conversation.id);
-      res.status(200).json({ threadId: conversation.id });
+      // Generate first sequential token for this thread
+      const nextToken = setNextToken(conversation.id);
+      res.status(200).json({ threadId: conversation.id, seqToken: nextToken });
       return;
     }
 
@@ -226,6 +287,9 @@ export default async function handler(req, res) {
 
           if (event.type === "response.completed") {
             console.log("Response completed successfully");
+            // Send next sequential token before ending
+            const nextToken = setNextToken(threadId);
+            res.write(`data: ${JSON.stringify({ seqToken: nextToken })}\n\n`);
             res.write("data: [DONE]\n\n");
             res.end();
             return;
@@ -237,13 +301,17 @@ export default async function handler(req, res) {
               event.error?.type ||
               "Unknown error";
             console.error(`Response stream failed (attempt ${attempt + 1}):`, errorMsg);
-            res.write(`data: ${JSON.stringify({ error: "Error: " + errorMsg })}\n\n`);
+            // Still send next token so user can retry
+            const nextToken = setNextToken(threadId);
+            res.write(`data: ${JSON.stringify({ error: "Error: " + errorMsg, seqToken: nextToken })}\n\n`);
             res.end();
             return;
           }
         }
 
         // If the stream ends without an explicit completion event, end gracefully.
+        const nextToken = setNextToken(threadId);
+        res.write(`data: ${JSON.stringify({ seqToken: nextToken })}\n\n`);
         res.write("data: [DONE]\n\n");
         res.end();
         return;
@@ -256,7 +324,9 @@ export default async function handler(req, res) {
         console.error(`Responses API error (attempt ${attempt + 1}):`, status || code || "unknown", errorMsg);
 
         if (!isServerError || attempt === MAX_RETRIES) {
-          res.write(`data: ${JSON.stringify({ error: "Error: " + errorMsg })}\n\n`);
+          // Still send next token so user can retry
+          const nextToken = setNextToken(threadId);
+          res.write(`data: ${JSON.stringify({ error: "Error: " + errorMsg, seqToken: nextToken })}\n\n`);
           res.write("data: [DONE]\n\n");
           res.end();
           return;

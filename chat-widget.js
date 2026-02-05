@@ -200,7 +200,7 @@
         if (parsed.threadId && Array.isArray(parsed.messages)) return parsed;
       }
     } catch (e) {}
-    return { threadId: null, messages: [] };
+    return { threadId: null, messages: [], seqToken: null };
   }
 
   function saveState() {
@@ -210,7 +210,7 @@
   }
 
   function resetState() {
-    state = { threadId: null, messages: [] };
+    state = { threadId: null, messages: [], seqToken: null };
     localStorage.removeItem(STORAGE_KEY);
     messagesEl.innerHTML = "";
     addMessageToDOM("assistant", WELCOME_MESSAGE);
@@ -263,6 +263,7 @@
       .then(function (data) {
         if (data.threadId) {
           state.threadId = data.threadId;
+          state.seqToken = data.seqToken || null;
           saveState();
           console.log("Sam AI: Thread created");
         } else {
@@ -302,6 +303,7 @@
         .then(function (data) {
           if (data.threadId) {
             state.threadId = data.threadId;
+            state.seqToken = data.seqToken || null;
             saveState();
             doSend(text);
           } else {
@@ -340,7 +342,7 @@
     fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ threadId: state.threadId, message: text, honeypot: honeypotEl?.value || "" }),
+      body: JSON.stringify({ threadId: state.threadId, message: text, honeypot: honeypotEl?.value || "", seqToken: state.seqToken || "" }),
     })
       .then(function (res) {
         typingEl.remove();
@@ -389,6 +391,11 @@
                   // Strip complete + trailing incomplete citations during streaming
                   msgEl.textContent = fullText.replace(/【[^】]*】/g, "").replace(/【[^】]*$/, "");
                   scrollToBottom();
+                }
+                if (parsed.seqToken) {
+                  // Update sequential token for next request
+                  state.seqToken = parsed.seqToken;
+                  saveState();
                 }
                 if (parsed.error) {
                   msgEl.textContent = parsed.error;
