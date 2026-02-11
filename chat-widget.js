@@ -492,10 +492,12 @@
     // Strip file_search citations like 【4:13†Alienated Book.docx】
     text = text.replace(/【[^】]*】/g, "").replace(/ {2,}/g, " ").trim();
     var escaped = escapeHtml(text);
-    // Bold: **text**
-    escaped = escaped.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-    // Italic: *text*
-    escaped = escaped.replace(/\*([^*\n]+)\*/g, "<em>$1</em>");
+    // Strip markdown formatting to keep it conversational
+    escaped = escaped.replace(/\*\*(.+?)\*\*/g, "$1");
+    escaped = escaped.replace(/\*([^*\n]+)\*/g, "$1");
+    escaped = escaped.replace(/^#{1,6}\s+/gm, "");
+    escaped = escaped.replace(/^[-*]\s+/gm, "");
+    escaped = escaped.replace(/^\d+\.\s+/gm, "");
     // URLs — Amazon gets a clean label, others show raw
     escaped = escaped.replace(/(https?:\/\/[^\s<]+)/g, function (url) {
       if (url.indexOf("amazon.co.uk") !== -1) {
