@@ -6,6 +6,7 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const ASSISTANT_ID = process.env.OPENAI_ASSISTANT_ID;
 const VECTOR_STORE_ID = process.env.OPENAI_VECTOR_STORE_ID;
 const MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
+const MAX_OUTPUT_TOKENS = parseInt(process.env.OPENAI_MAX_OUTPUT_TOKENS || "450", 10);
 
 // ============ SECURITY CONFIGURATION ============
 const ALLOWED_ORIGINS = [
@@ -275,7 +276,7 @@ export default async function handler(req, res) {
           conversation: threadId,
           input: message,
           stream: true,
-          max_output_tokens: 350, // ~250 words max response
+          max_output_tokens: MAX_OUTPUT_TOKENS,
           ...(vectorStoreId
             ? { tools: [{ type: "file_search", vector_store_ids: [vectorStoreId] }] }
             : {}),
