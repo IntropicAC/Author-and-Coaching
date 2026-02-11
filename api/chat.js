@@ -7,6 +7,7 @@ const ASSISTANT_ID = process.env.OPENAI_ASSISTANT_ID;
 const VECTOR_STORE_ID = process.env.OPENAI_VECTOR_STORE_ID;
 const MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
 const MAX_OUTPUT_TOKENS = parseInt(process.env.OPENAI_MAX_OUTPUT_TOKENS || "450", 10);
+const MAX_RESPONSE_WORDS = parseInt(process.env.SAM_MAX_RESPONSE_WORDS || "300", 10);
 
 // ============ SECURITY CONFIGURATION ============
 const ALLOWED_ORIGINS = [
@@ -50,6 +51,14 @@ function validateSequentialToken(threadId, token) {
   }
 
   return { valid: true };
+}
+
+function extractRequestedWordCount(message) {
+  if (!message || typeof message !== "string") return null;
+  const match = message.match(/(\d{1,3}(?:,\d{3})?)\s*(?:word|words)\b/i);
+  if (!match) return null;
+  const value = parseInt(match[1].replace(/,/g, ""), 10);
+  return Number.isFinite(value) ? value : null;
 }
 
 function setNextToken(threadId) {
@@ -245,13 +254,27 @@ export default async function handler(req, res) {
       return;
     }
 
-    console.log("Sending message to conversation:", threadId);
-
-    // Stream the response (retry up to 2 times on server errors)
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
 
+    const requestedWordCount = extractRequestedWordCount(message);
+    if (requestedWordCount && requestedWordCount > MAX_RESPONSE_WORDS) {
+      const reply =
+        `I keep replies under ${MAX_RESPONSE_WORDS} words so they stay complete and readable. ` +
+        "I can give you a shorter summary, or split it into parts and continue if you want. " +
+        "Which would you prefer?";
+      const nextToken = setNextToken(threadId);
+      res.write(`data: ${JSON.stringify({ text: reply })}\n\n`);
+      res.write(`data: ${JSON.stringify({ seqToken: nextToken })}\n\n`);
+      res.write("data: [DONE]\n\n");
+      res.end();
+      return;
+    }
+
+    console.log("Sending message to conversation:", threadId);
+
+    // Stream the response (retry up to 2 times on server errors)
     let vectorStoreId = VECTOR_STORE_ID || null;
     if (!vectorStoreId && ASSISTANT_ID) {
       try {
