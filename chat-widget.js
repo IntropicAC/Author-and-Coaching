@@ -127,6 +127,11 @@
       </div>
     </div>
     <div class="sam-chat-messages"></div>
+    <button class="sam-chat-scroll-indicator" type="button" aria-label="Jump to latest">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M19 15l-7 7-7-7h4V4h6v11z"/>
+      </svg>
+    </button>
     <div class="sam-chat-input-area">
       <input class="sam-chat-input" type="text" placeholder="Ask about Sam's books or coaching..." />
       <input type="text" name="website" class="sam-chat-hp" autocomplete="off" tabindex="-1" aria-hidden="true" />
@@ -143,6 +148,45 @@
   const sendBtnEl = container.querySelector(".sam-chat-send");
   const closeBtn = container.querySelector(".sam-chat-close");
   const newBtn = container.querySelector(".sam-chat-new");
+  const scrollIndicatorEl = container.querySelector(".sam-chat-scroll-indicator");
+
+  /* ---- Auto-scroll control ---- */
+  var shouldAutoScroll = true;
+  var hasUnread = false;
+  var autoScrollThreshold = 48; // px from bottom considered "at bottom"
+  function isNearBottom() {
+    var distance = messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight;
+    return distance <= autoScrollThreshold;
+  }
+  function updateScrollIndicator() {
+    if (!scrollIndicatorEl) return;
+    var show = hasUnread && !isNearBottom();
+    scrollIndicatorEl.classList.toggle("visible", show);
+  }
+  function markUnread() {
+    hasUnread = true;
+    updateScrollIndicator();
+  }
+  function clearUnread() {
+    hasUnread = false;
+    updateScrollIndicator();
+  }
+  messagesEl.addEventListener(
+    "scroll",
+    function () {
+      shouldAutoScroll = isNearBottom();
+      if (shouldAutoScroll) clearUnread();
+      else updateScrollIndicator();
+    },
+    { passive: true }
+  );
+  if (scrollIndicatorEl) {
+    scrollIndicatorEl.addEventListener("click", function () {
+      shouldAutoScroll = true;
+      clearUnread();
+      scrollToBottom(true);
+    });
+  }
 
   /* ---- Hide honeypot (bot trap) ---- */
   if (honeypotEl) {
@@ -213,6 +257,8 @@
     state = { threadId: null, messages: [], seqToken: null };
     localStorage.removeItem(STORAGE_KEY);
     messagesEl.innerHTML = "";
+    shouldAutoScroll = true;
+    clearUnread();
     addMessageToDOM("assistant", WELCOME_MESSAGE);
     showPromptSuggestions();
     welcomeShown = true;
@@ -238,6 +284,8 @@
 
     if (isOpen) {
       lockPageScroll();
+      shouldAutoScroll = true;
+      clearUnread();
       if (!welcomeShown) {
         addMessageToDOM("assistant", WELCOME_MESSAGE);
         showPromptSuggestions();
@@ -332,6 +380,9 @@
     addMessageToDOM("user", text);
     state.messages.push({ role: "user", content: text });
     saveState();
+    shouldAutoScroll = true;
+    clearUnread();
+    scrollToBottom(true);
 
     inputEl.value = "";
     sendBtnEl.disabled = true;
@@ -374,6 +425,11 @@
               isLoading = false;
               sendBtnEl.disabled = !inputEl.value.trim();
               scrollToBottom();
+              if (!isNearBottom()) {
+                markUnread();
+              } else {
+                clearUnread();
+              }
               return;
             }
 
@@ -476,7 +532,9 @@
   }
 
   function scrollToBottom() {
+    var force = arguments.length > 0 && arguments[0] === true;
     requestAnimationFrame(function () {
+      if (!force && !shouldAutoScroll) return;
       messagesEl.scrollTop = messagesEl.scrollHeight;
     });
   }

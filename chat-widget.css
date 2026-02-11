@@ -177,6 +177,43 @@
   border-radius: 10px;
 }
 
+/* Message complete indicator */
+.sam-chat-scroll-indicator {
+  position: absolute;
+  right: 1rem;
+  bottom: calc(4.25rem + var(--sam-safe-bottom));
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(6px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease;
+  z-index: 2;
+  padding: 0;
+}
+.sam-chat-scroll-indicator.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.sam-chat-scroll-indicator:hover {
+  background: var(--color-bg-tertiary);
+}
+.sam-chat-scroll-indicator svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
 /* Message bubbles */
 .sam-chat-msg {
   max-width: 85%;
@@ -429,6 +466,9 @@
     padding-bottom: calc(0.75rem + var(--sam-safe-bottom));
     padding-left: calc(1rem + var(--sam-safe-left));
     padding-right: calc(1rem + var(--sam-safe-right));
+  }
+  .sam-chat-scroll-indicator {
+    bottom: calc(4.75rem + var(--sam-safe-bottom));
   }
   .sam-chat-toggle {
     bottom: calc(1.25rem + var(--sam-safe-bottom) + var(--sam-vv-bottom, 0px));
