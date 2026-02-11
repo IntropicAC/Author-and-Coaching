@@ -204,10 +204,13 @@ export default async function handler(req, res) {
   if (action !== "create_thread" && threadId) {
     const tokenCheck = validateSequentialToken(threadId, seqToken);
     if (!tokenCheck.valid) {
+      const existing = tokenMap.get(threadId);
+      const recoveryToken = existing?.token || setNextToken(threadId);
       return res.status(429).json({
         error: tokenCheck.reason === "expired"
           ? "Session expired. Please refresh the page."
-          : "Please wait for the previous message to complete."
+          : "Please wait for the previous message to complete.",
+        seqToken: recoveryToken,
       });
     }
   }

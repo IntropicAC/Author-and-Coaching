@@ -153,7 +153,7 @@
   /* ---- Auto-scroll control ---- */
   var shouldAutoScroll = true;
   var hasUnread = false;
-  var autoScrollThreshold = 48; // px from bottom considered "at bottom"
+  var autoScrollThreshold = 24; // px from bottom considered "at bottom"
   function isNearBottom() {
     var distance = messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight;
     return distance <= autoScrollThreshold;
@@ -177,6 +177,35 @@
       shouldAutoScroll = isNearBottom();
       if (shouldAutoScroll) clearUnread();
       else updateScrollIndicator();
+    },
+    { passive: true }
+  );
+  messagesEl.addEventListener(
+    "wheel",
+    function (e) {
+      if (!isLoading) return;
+      if (e.deltaY < 0) {
+        shouldAutoScroll = false;
+        updateScrollIndicator();
+      }
+    },
+    { passive: true }
+  );
+  messagesEl.addEventListener(
+    "touchstart",
+    function () {
+      if (!isLoading) return;
+      shouldAutoScroll = false;
+      updateScrollIndicator();
+    },
+    { passive: true }
+  );
+  messagesEl.addEventListener(
+    "pointerdown",
+    function () {
+      if (!isLoading) return;
+      shouldAutoScroll = false;
+      updateScrollIndicator();
     },
     { passive: true }
   );
@@ -399,7 +428,14 @@
         typingEl.remove();
         if (!res.ok) {
           return res.json().then(function (data) {
+            if (data && data.seqToken) {
+              state.seqToken = data.seqToken;
+              saveState();
+            }
             var errorMsg = data.error || "HTTP " + res.status;
+            if (data && data.seqToken && errorMsg === "Please wait for the previous message to complete.") {
+              errorMsg = "Looks like the previous reply didn't finish. Please send your message again.";
+            }
             console.error("Sam AI: API error:", errorMsg);
             addMessageToDOM("assistant", errorMsg);
             isLoading = false;
