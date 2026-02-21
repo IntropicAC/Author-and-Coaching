@@ -128,10 +128,8 @@ $("#toTop")?.addEventListener("click", (e) => {
 
 
 // =====================
-// Contact form
+// Contact form handled at bottom of file
 // =====================
-const form = $("#contact-form");
-const notice = $("#form-notice");
 
 
 // =====================
@@ -368,36 +366,89 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // === Contact form (client-side, direct to Web3Forms) ===
-form?.addEventListener("submit", (e) => {
-  e.preventDefault();
-  const data = Object.fromEntries(new FormData(form).entries());
+(() => {
+  const form   = document.getElementById('contact-form');
+  const notice = document.getElementById('form-notice');
+  if (!form || !notice) return;
 
-  if (!data.name || !data.email || !data.message) {
-    notice.textContent = "Please fill in all fields.";
-    return;
+  const WEB3FORMS_ACCESS_KEY = 'ea43cbd1-40ff-48e6-a2f0-f7db5530624a';
+  const EMAIL_SUBJECT  = 'New Website Message';
+  const EMAIL_FROMNAME = 'My coaching Website';
+
+  const pageLoadTs = Date.now();
+
+  function isValidEmail(v) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
   }
-  if (!emailRegex.test(data.email)) {
-    notice.textContent = "Please enter a valid email address.";
-    return;
-  }
 
-  notice.textContent = "Sending...";
+  ['name','email','message'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () => el.setCustomValidity(''));
+  });
 
-  fetch("https://api.web3forms.com/submit", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify(data),
-  })
-    .then((res) => res.json())
-    .then((json) => {
-      if (json.success) {
-        notice.textContent = "Sent ✅";
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const name    = document.getElementById('name');
+    const email   = document.getElementById('email');
+    const message = document.getElementById('message');
+
+    [name, email, message].forEach(el => el && el.setCustomValidity(''));
+
+    let hasError = false;
+
+    if (!name.value.trim()) {
+      name.setCustomValidity('Please enter your name.');
+      if (!hasError) { name.reportValidity(); name.focus(); }
+      hasError = true;
+    }
+
+    if (!email.value.trim()) {
+      email.setCustomValidity('Please enter your email.');
+      if (!hasError) { email.reportValidity(); email.focus(); }
+      hasError = true;
+    } else if (!isValidEmail(email.value)) {
+      email.setCustomValidity('Please enter a valid email address.');
+      if (!hasError) { email.reportValidity(); email.focus(); }
+      hasError = true;
+    }
+
+    if (!message.value.trim()) {
+      message.setCustomValidity('Please enter a message.');
+      if (!hasError) { message.reportValidity(); message.focus(); }
+      hasError = true;
+    }
+
+    if (hasError) return;
+
+    if (Date.now() - pageLoadTs < 1200) {
+      return;
+    }
+
+    notice.textContent = 'Sending...';
+
+    try {
+      const fd = new FormData();
+      fd.append('access_key', WEB3FORMS_ACCESS_KEY);
+      fd.append('subject', EMAIL_SUBJECT);
+      fd.append('from_name', EMAIL_FROMNAME);
+      fd.append('name',    name.value.trim());
+      fd.append('email',   email.value.trim());
+      fd.append('message', message.value.trim());
+
+      const res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: fd });
+      const data = await res.json();
+
+      if (data.success) {
+        notice.textContent = 'Sent ✅';
         form.reset();
+      } else if (data.message && /quota|limit/i.test(data.message)) {
+        notice.textContent = 'Temporarily unavailable. Please message me threw any links below.';
       } else {
-        notice.textContent = json.message || "Something went wrong. Please try again.";
+        notice.textContent = 'Something went wrong. Please try again.';
       }
-    })
-    .catch(() => {
-      notice.textContent = "Network error. Please try again.";
-    });
-});
+    } catch {
+      notice.textContent = 'Network error. Please try again.';
+    }
+  });
+})();
