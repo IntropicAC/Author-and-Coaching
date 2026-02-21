@@ -128,7 +128,10 @@ $("#toTop")?.addEventListener("click", (e) => {
 
 
 // =====================
-// Contact form handled via /api/contact (see bottom of file)
+// Contact form
+// =====================
+const form = $("#contact-form");
+const notice = $("#form-notice");
 
 
 // =====================
@@ -364,92 +367,37 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-// === Contact form integration (server-side via /api/contact) ===
-(() => {
-  const form   = document.getElementById('contact-form');
-  const notice = document.getElementById('form-notice');
-  if (!form || !notice) return;
+// === Contact form (client-side, direct to Web3Forms) ===
+form?.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(form).entries());
 
-  // Simple time-trap to reduce bot spam
-  const pageLoadTs = Date.now();
-
-  function isValidEmail(v) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+  if (!data.name || !data.email || !data.message) {
+    notice.textContent = "Please fill in all fields.";
+    return;
+  }
+  if (!emailRegex.test(data.email)) {
+    notice.textContent = "Please enter a valid email address.";
+    return;
   }
 
-  // Clear custom validity as the user types
-  ['name','email','message'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('input', () => el.setCustomValidity(''));
-  });
+  notice.textContent = "Sending...";
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const name    = document.getElementById('name');
-    const email   = document.getElementById('email');
-    const message = document.getElementById('message');
-
-    // Reset any previous custom errors
-    [name, email, message].forEach(el => el && el.setCustomValidity(''));
-
-    // ------ Our original validations, but without tiny #form-notice text ------
-    let hasError = false;
-
-    if (!name.value.trim()) {
-      name.setCustomValidity('Please enter your name.');
-      if (!hasError) { name.reportValidity(); name.focus(); }
-      hasError = true;
-    }
-
-    if (!email.value.trim()) {
-      email.setCustomValidity('Please enter your email.');
-      if (!hasError) { email.reportValidity(); email.focus(); }
-      hasError = true;
-    } else if (!isValidEmail(email.value)) {
-      email.setCustomValidity('Please enter a valid email address.');
-      if (!hasError) { email.reportValidity(); email.focus(); }
-      hasError = true;
-    }
-
-    if (!message.value.trim()) {
-      message.setCustomValidity('Please enter a message.');
-      if (!hasError) { message.reportValidity(); message.focus(); }
-      hasError = true;
-    }
-
-    if (hasError) return; // stop here on validation errors
-
-    // Time-trap: block super-fast submits (likely bots)
-    if (Date.now() - pageLoadTs < 1200) {
-      // silently ignore (no tiny text in notice)
-      return;
-    }
-
-    // ------ Send only when valid ------
-    notice.textContent = 'Sending...';
-
-    try {
-      const res = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: name.value.trim(),
-          email: email.value.trim(),
-          message: message.value.trim()
-        })
-      });
-
-      const data = await res.json().catch(() => null);
-
-      if (res.ok && data && data.success) {
-        notice.textContent = 'Sent ✅';
+  fetch("https://api.web3forms.com/submit", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify(data),
+  })
+    .then((res) => res.json())
+    .then((json) => {
+      if (json.success) {
+        notice.textContent = "Sent ✅";
         form.reset();
       } else {
-        notice.textContent = (data && (data.error || data.message)) || 'Something went wrong. Please try again.';
+        notice.textContent = json.message || "Something went wrong. Please try again.";
       }
-    } catch {
-      notice.textContent = 'Network error. Please try again.';
-    }
-  });
-})();
+    })
+    .catch(() => {
+      notice.textContent = "Network error. Please try again.";
+    });
+});
